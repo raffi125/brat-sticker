@@ -263,6 +263,12 @@ textarea:focus {
 .site-footer .note {
   color: #9a9a90;
 }
+.site-footer .footer-left p + p {
+  margin-top: 2px;
+}
+.site-footer .credit {
+  color: #9a9a90;
+}
 
 .toast {
   position: fixed;
