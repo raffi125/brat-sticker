@@ -64,7 +64,25 @@
     return `${STYLE.weight} ${px}px ${STYLE.font}`;
   }
 
-  function wrapText(ctx, text, maxWidth) {
+  function wrapParagraph(ctx, words, maxWidth) {
+    const lines = [];
+    let current = words[0];
+    for (let i = 1; i < words.length; i += 1) {
+      const candidate = `${current} ${words[i]}`;
+      if (ctx.measureText(candidate).width <= maxWidth) {
+        current = candidate;
+      } else {
+        lines.push(current);
+        current = words[i];
+      }
+    }
+    lines.push(current);
+    return lines;
+  }
+
+  // lebar baris sekecil mungkin tanpa menambah jumlah baris: baris jadi
+  // hampir sama panjang, jadi regangan horizontal tiap baris kecil.
+  function balancedWrap(ctx, text, maxWidth) {
     const lines = [];
     for (const paragraph of text.split('\n')) {
       const words = paragraph.split(/\s+/).filter(Boolean);
@@ -72,17 +90,20 @@
         lines.push('');
         continue;
       }
-      let current = words[0];
-      for (let i = 1; i < words.length; i += 1) {
-        const candidate = `${current} ${words[i]}`;
-        if (ctx.measureText(candidate).width <= maxWidth) {
-          current = candidate;
-        } else {
-          lines.push(current);
-          current = words[i];
-        }
+      const count = wrapParagraph(ctx, words, maxWidth).length;
+      if (count < 2) {
+        lines.push(words.join(' '));
+        continue;
       }
-      lines.push(current);
+      let narrow = 0;
+      for (const word of words) narrow = Math.max(narrow, ctx.measureText(word).width);
+      let wide = maxWidth;
+      for (let step = 0; step < 18; step += 1) {
+        const mid = (wide + narrow) / 2;
+        if (wrapParagraph(ctx, words, mid).length <= count) wide = mid;
+        else narrow = mid;
+      }
+      lines.push(...wrapParagraph(ctx, words, wide));
     }
     return lines;
   }
@@ -100,10 +121,16 @@
     for (let step = 0; step < 24; step += 1) {
       const mid = (lo + hi) / 2;
       ctx.font = fontString(mid);
-      const lines = wrapText(ctx, text, targetW);
+      const lines = balancedWrap(ctx, text, targetW);
       const blockH = lines.length * mid;
       let widest = 0;
-      for (const line of lines) widest = Math.max(widest, ctx.measureText(line).width);
+      let narrowest = targetW;
+      for (const line of lines) {
+        if (!line) continue;
+        const width = ctx.measureText(line).width;
+        widest = Math.max(widest, width);
+        narrowest = Math.min(narrowest, width);
+      }
       if (blockH <= availH + 0.01 && widest <= targetW + 0.01) {
         lo = mid;
         bestFont = mid;
@@ -116,7 +143,7 @@
     if (!bestLines) {
       bestFont = lo;
       ctx.font = fontString(bestFont);
-      bestLines = wrapText(ctx, text, targetW);
+      bestLines = balancedWrap(ctx, text, targetW);
     }
 
     let fontPx = bestFont;
@@ -127,7 +154,7 @@
     if (blockH > maxBlockH) {
       fontPx *= maxBlockH / blockH;
       ctx.font = fontString(fontPx);
-      lines = wrapText(ctx, text, targetW);
+      lines = balancedWrap(ctx, text, targetW);
       blockH = lines.length * fontPx;
     }
 
@@ -163,7 +190,7 @@
       if (!line) continue;
       const lineWidth = ctx.measureText(line).width;
       if (lineWidth <= 0) continue;
-      const stretchX = Math.max(0.15, Math.min(8, targetW / lineWidth));
+      const stretchX = Math.max(0.15, Math.min(1.9, targetW / lineWidth));
       ctx.save();
       ctx.translate(pad, startY + i * fontPx);
       ctx.scale(stretchX, 1);
