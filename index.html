@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f2f2ec">
+  <title>brat sticker</title>
+  <meta name="description" content="brat sticker maker for whatsapp. renders in your browser, exports one 512 png.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2312120f'/%3E%3Ctext x='32' y='46' font-family='Arial Narrow, Arial, sans-serif' font-size='46' font-weight='400' text-anchor='middle' fill='%23f4f4ef'%3Eb%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="wrap site-header">
+    <h1 class="brand">brat sticker generator</h1>
+  </header>
+
+  <main class="wrap workspace">
+    <section class="preview-pane" aria-label="preview">
+      <div class="canvas-frame">
+        <canvas id="preview" width="1024" height="1024" aria-label="brat sticker preview"></canvas>
+      </div>
+      <div class="preview-actions">
+        <button id="btnDownload" class="btn btn-primary" type="button">download png</button>
+        <button id="btnCopy" class="btn" type="button">copy</button>
+        <button id="btnShare" class="btn" type="button">share</button>
+      </div>
+    </section>
+
+    <aside class="controls" aria-label="sticker text">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>text</h2>
+          <span class="count" id="charCount">4/240</span>
+        </div>
+        <textarea id="text" rows="3" maxlength="240" spellcheck="false" placeholder="type text">brat</textarea>
+        <div class="samples" id="chips" aria-label="examples">
+          <button class="sample" type="button" data-text="so true">so true</button>
+          <button class="sample" type="button" data-text="brat summer">brat summer</button>
+          <button class="sample" type="button" data-text="no thoughts">no thoughts</button>
+          <button class="sample" type="button" data-text="not now">not now</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>export</h2>
+        <button class="btn btn-block" id="btnBatch" type="button">download each line</button>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>send the png to a chat, tap it, pick “sticker”.</p>
+    <p class="note">text is saved in this browser.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div class="wrap"><p>needs javascript.</p></div>
+  </noscript>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
